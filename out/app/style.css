@@ -1,0 +1,335 @@
+/* DompetKeluarga — buku kas keluarga.
+   Arah visual: kertas buku kas hangat, tinta hijau buku kas, garis aturan.
+   Satu elemen berani: angka "Sisa bulan ini" besar bergaya buku kas.
+   Tanpa font eksternal, tanpa gambar, tanpa request jaringan. */
+
+:root {
+  --paper: #FBF7EE;
+  --card: #FFFDF7;
+  --ink: #1C2B23;
+  --ink-soft: #3D4A42;
+  --muted: #6B756D;
+  --green: #166B4A;
+  --green-tint: #E3EFE7;
+  --amber: #9A5B00;
+  --amber-tint: #F7EAD3;
+  --red: #A93226;
+  --red-tint: #F8E3DF;
+  --line: #DCD5C2;
+  --line-strong: #B9B09A;
+  --radius: 10px;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  /* Garis aturan halus seperti halaman buku kas. */
+  background-image: repeating-linear-gradient(
+    to bottom, transparent 0, transparent 31px, rgba(22, 107, 74, 0.05) 31px, rgba(22, 107, 74, 0.05) 32px);
+}
+
+h1, h2, h3 { font-family: var(--serif); color: var(--ink); line-height: 1.2; }
+h1 { font-size: 1.9rem; margin: 0 0 0.4rem; text-wrap: balance; }
+h2 { font-size: 1.25rem; margin: 0 0 0.75rem; }
+p { margin: 0 0 0.75rem; }
+a { color: var(--green); }
+a:hover { text-decoration-thickness: 2px; }
+
+.muted { color: var(--muted); font-size: 0.92rem; }
+.lede { color: var(--ink-soft); max-width: 62ch; }
+.num, .tx-amount, .bar-value, .donut-total { font-variant-numeric: tabular-nums; }
+
+.skip-link {
+  position: absolute; left: 1rem; top: -4rem;
+  background: var(--ink); color: #fff; padding: 0.6rem 1rem; border-radius: 6px;
+  z-index: 10; transition: top 0.15s;
+}
+.skip-link:focus { top: 1rem; color: #fff; }
+
+:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; border-radius: 4px; }
+
+/* ---- Header + navigasi ---- */
+
+.site-header {
+  border-bottom: 2px solid var(--ink);
+  padding: 1rem clamp(1rem, 4vw, 2.5rem) 0;
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.5rem 2rem;
+  background: var(--paper);
+}
+.brand { display: flex; align-items: center; gap: 0.75rem; }
+.brand-mark {
+  display: grid; place-items: center;
+  width: 3rem; height: 3rem; border-radius: 50%;
+  background: var(--green); color: #fff;
+  font-family: var(--serif); font-weight: 700; font-size: 1.15rem;
+}
+.brand-name {
+  font-family: var(--serif); font-weight: 700; font-size: 1.45rem;
+  margin: 0; line-height: 1.1;
+}
+.brand-sub { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.household-meta { margin: 0 0 0.35rem; color: var(--muted); font-size: 0.92rem; }
+
+.main-nav {
+  display: flex; flex-wrap: wrap; gap: 0.25rem;
+  margin-left: auto; padding-bottom: 0;
+}
+.main-nav a {
+  display: inline-block; padding: 0.6rem 0.9rem 0.7rem;
+  color: var(--ink-soft); text-decoration: none; font-weight: 600;
+  border-bottom: 3px solid transparent; border-radius: 6px 6px 0 0;
+  min-height: 44px; touch-action: manipulation;
+}
+.main-nav a:hover { color: var(--ink); background: var(--green-tint); }
+.main-nav a[aria-current="page"] { color: var(--green); border-bottom-color: var(--green); }
+
+/* ---- Isi ---- */
+
+main {
+  max-width: 1080px; margin: 0 auto;
+  padding: 1.75rem clamp(1rem, 4vw, 2.5rem) 2.5rem;
+}
+main:focus { outline: none; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1.25rem;
+}
+.card-foot { margin: 0.9rem 0 0; font-size: 0.95rem; }
+
+.grid-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+}
+.grid-2 > .card { margin-bottom: 0; }
+.grid-2 { margin-bottom: 1.25rem; }
+
+/* ---- Dashboard: kepala buku kas ---- */
+
+.ledger-head {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 1.5rem 1.6rem;
+  margin-bottom: 1.25rem;
+}
+.ledger-head .month { margin: 0 0 0.25rem; color: var(--muted); font-size: 0.95rem; }
+.ledger-head h1 {
+  font-size: clamp(1.7rem, 4.5vw, 2.5rem);
+  font-weight: 400; margin: 0 0 0.5rem;
+}
+.ledger-head h1 strong {
+  font-weight: 700; color: var(--green);
+  border-bottom: 2px solid var(--green);
+}
+.kpi {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  margin: 1.1rem 0 0; padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.kpi div { margin: 0; }
+.kpi dt { color: var(--muted); font-size: 0.9rem; }
+.kpi dd { margin: 0.15rem 0 0; font-family: var(--serif); font-size: 1.35rem; font-weight: 700; }
+.in { color: var(--green); }
+.out { color: var(--red); }
+
+/* ---- Donat + legenda ---- */
+
+.donut-wrap { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+.donut { width: 200px; height: 200px; flex: none; }
+.donut-total { font-family: var(--serif); font-size: 17px; font-weight: 700; fill: var(--ink); }
+.donut-label { font-size: 11px; fill: var(--muted); }
+.legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 200px; }
+.legend li {
+  display: flex; gap: 0.6rem; align-items: baseline;
+  padding: 0.32rem 0; border-bottom: 1px solid var(--line);
+}
+.legend li:last-child { border-bottom: 0; }
+.swatch {
+  display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 2px; flex: none;
+  transform: translateY(1px);
+}
+.legend-name { flex: 1; }
+.legend-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+.legend-inline .swatch { margin: 0 0.3rem 0 1rem; }
+.legend-inline .swatch:first-child { margin-left: 0; }
+
+/* ---- Daftar pantauan anggaran ---- */
+
+.watch-list { list-style: none; margin: 0; padding: 0; }
+.watch-row {
+  display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+  padding: 0.6rem 0; border-bottom: 1px solid var(--line);
+}
+.watch-row:last-child { border-bottom: 0; }
+.watch-pct { font-size: 0.92rem; font-weight: 600; text-align: right; }
+.watch-pct.warn { color: var(--amber); }
+.watch-pct.over { color: var(--red); }
+
+/* ---- Daftar transaksi ringkas ---- */
+
+.tx-list { list-style: none; margin: 0; padding: 0; }
+.tx-list li {
+  display: grid; grid-template-columns: 7.5rem 1fr auto auto; gap: 0.75rem;
+  align-items: baseline; padding: 0.55rem 0; border-bottom: 1px solid var(--line);
+}
+.tx-list li:last-child { border-bottom: 0; }
+.tx-date { color: var(--muted); font-size: 0.9rem; }
+.tx-note { overflow-wrap: anywhere; }
+.tx-cat { color: var(--muted); font-size: 0.9rem; }
+.tx-amount { font-weight: 700; white-space: nowrap; }
+
+/* ---- Progress + status ---- */
+
+.progress {
+  height: 12px; border-radius: 6px; background: #EDE8DA;
+  overflow: hidden; margin: 0.5rem 0;
+}
+.progress span {
+  display: block; height: 100%; background: var(--green); border-radius: 6px;
+  transition: width 0.3s ease;
+}
+.progress.warn span { background: var(--amber); }
+.progress.over span { background: var(--red); }
+.goal-line { margin-bottom: 0.25rem; }
+
+.status {
+  display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px;
+  font-size: 0.85rem; font-weight: 700; white-space: nowrap;
+}
+.status.ok { background: var(--green-tint); color: var(--green); }
+.status.warn { background: var(--amber-tint); color: var(--amber); }
+.status.over { background: var(--red-tint); color: var(--red); }
+
+/* ---- Anggaran ---- */
+
+.budget-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.budget-head h2 { margin: 0; }
+.budget-nums { margin: 0.6rem 0 0.25rem; }
+.budget-nums strong { font-family: var(--serif); font-size: 1.25rem; }
+.budget-form, .goal-form {
+  display: flex; gap: 0.5rem; align-items: end; flex-wrap: wrap;
+  margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px dashed var(--line);
+}
+.budget-form label, .goal-form label { font-size: 0.9rem; color: var(--muted); }
+.budget-form input, .goal-form input { flex: 1; min-width: 9rem; }
+
+/* ---- Form ---- */
+
+.form-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem 1.25rem;
+}
+.field { display: flex; flex-direction: column; gap: 0.3rem; }
+.field.wide { grid-column: 1 / -1; }
+.field label { font-weight: 600; font-size: 0.95rem; }
+.hint { color: var(--muted); font-size: 0.88rem; }
+input, select, textarea {
+  font: inherit; color: var(--ink);
+  background: #fff; border: 1px solid var(--line-strong); border-radius: 8px;
+  padding: 0.6rem 0.75rem; min-height: 44px; width: 100%;
+  touch-action: manipulation;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--green); outline: 3px solid rgba(22, 107, 74, 0.25); outline-offset: 0;
+}
+input:user-invalid, select:user-invalid {
+  border-color: var(--red); background: #FDF3F1;
+}
+.error-msg { display: none; color: var(--red); font-size: 0.9rem; }
+input:user-invalid + .error-msg { display: block; }
+.form-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 1rem; }
+.form-status { color: var(--green); font-weight: 600; }
+
+button { font: inherit; cursor: pointer; touch-action: manipulation; }
+.btn-primary {
+  background: var(--green); color: #fff; border: 1px solid var(--green);
+  border-radius: 8px; padding: 0.65rem 1.3rem; font-weight: 700; min-height: 44px;
+}
+.btn-primary:hover { background: #11573C; }
+.btn-ghost {
+  background: transparent; color: var(--green); border: 1px solid var(--green);
+  border-radius: 8px; padding: 0.6rem 1rem; font-weight: 600; min-height: 44px;
+}
+.btn-ghost:hover { background: var(--green-tint); }
+.link-btn {
+  background: none; border: 0; padding: 0.25rem 0.4rem; color: var(--green);
+  font-weight: 600; text-decoration: underline; text-underline-offset: 2px;
+}
+.link-btn.danger { color: var(--red); }
+
+/* ---- Filter + tabel ---- */
+
+.filters {
+  display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem;
+  align-items: end; margin-bottom: 0.75rem;
+}
+.field.align-end { justify-content: end; }
+.table-wrap { overflow-x: auto; }
+table.tx-table { width: 100%; border-collapse: collapse; font-size: 0.97rem; }
+.tx-table th, .tx-table td { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tx-table thead th { border-bottom: 2px solid var(--ink); font-size: 0.9rem; color: var(--ink-soft); }
+.tx-table .num { text-align: right; white-space: nowrap; }
+.tx-table tfoot td { font-weight: 700; border-bottom: 0; }
+.tx-table .empty { text-align: center; color: var(--muted); padding: 1.5rem 0.5rem; }
+.row-actions { white-space: nowrap; text-align: right; }
+
+/* ---- Grafik ---- */
+
+.chart-block { overflow-x: auto; }
+.chart { width: 100%; height: auto; display: block; }
+.bar-label { font-size: 13px; fill: var(--ink); }
+.bar-value { font-size: 13px; fill: var(--ink); font-weight: 600; }
+.bar-track { fill: #EDE8DA; }
+.axis-label { font-size: 12px; fill: var(--muted); }
+.grid-line { stroke: #E7E1D1; stroke-width: 1; }
+.line { stroke-width: 2.5; }
+.line-income { stroke: var(--green); }
+.line-expense { stroke: var(--amber); }
+.dot { r: 4; }
+.dot.line-income { fill: var(--green); }
+.dot.line-expense { fill: var(--amber); }
+
+/* ---- Footer ---- */
+
+.site-footer {
+  max-width: 1080px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem) 2rem;
+  border-top: 1px solid var(--line); padding-top: 1rem;
+}
+
+.visually-hidden {
+  position: absolute !important; clip-path: inset(50%) !important;
+  overflow: hidden !important; width: 1px !important; height: 1px !important;
+  margin: -1px !important; padding: 0 !important; border: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* ---- Ponsel ---- */
+
+@media (max-width: 720px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .filters { grid-template-columns: 1fr 1fr; }
+  .kpi { grid-template-columns: 1fr; gap: 0.6rem; }
+  .kpi dd { font-size: 1.2rem; }
+  .main-nav { margin-left: 0; width: 100%; }
+  .main-nav a { flex: 1 1 auto; text-align: center; padding: 0.6rem 0.4rem; }
+  .tx-list li { grid-template-columns: 5.5rem 1fr auto; }
+  .tx-cat { display: none; }
+  .donut-wrap { justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
